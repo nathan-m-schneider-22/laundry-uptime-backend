@@ -53,7 +53,7 @@ app.post('/data', (req,res) => {
 
 });
 
-var j = schedule.scheduleJob('*/5 * * * * *', function(){
+var j = schedule.scheduleJob('*/5 * * * *', function(){
     const time = Date.now()
     scrapeData().then((data) => {
         MongoClient.connect(URL, function(err, db) {
