@@ -42,6 +42,7 @@ app.get('/data', (req,res) => {
 })
 
 app.get('/', (req, res) => {
+  console.log("pinged")
     res.send({"message" :"This API is not for getting"})
 
 })
@@ -52,7 +53,7 @@ app.post('/data', (req,res) => {
 
 });
 
-var j = schedule.scheduleJob('*/5 * * * *', function(){
+var j = schedule.scheduleJob('*/5 * * * * *', function(){
     const time = Date.now()
     scrapeData().then((data) => {
         MongoClient.connect(URL, function(err, db) {
@@ -62,12 +63,21 @@ var j = schedule.scheduleJob('*/5 * * * *', function(){
 
           dbo.collection("scraped").insertMany(data, function(err, res) {
             if (err) throw err;
+            console.log(data[0])
             console.log("documents inserted");
             db.close();
           });
       
         })
     })
+
+    request('https://laundry-uptime.herokuapp.com/', { json: true }, (err, res, body) => {
+      if (err) { return console.log(err); }
+      console.log("Self-call")
+      console.log(body);
+
+    });
+
 
   });
 
