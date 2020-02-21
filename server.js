@@ -52,14 +52,14 @@ app.post('/data', (req,res) => {
 
 });
 
-var j = schedule.scheduleJob('* */5 * * * *', function(){
+var j = schedule.scheduleJob('*/5 * * * *', function(){
     const time = Date.now()
     scrapeData().then((data) => {
         MongoClient.connect(URL, function(err, db) {
           if (err) throw err;
           var dbo = db.db(DB);
           for (i=0;i<data.length;i++){data[i].time = time}
-          console.log(data)
+
           dbo.collection("scraped").insertMany(data, function(err, res) {
             if (err) throw err;
             console.log("documents inserted");
