@@ -114,8 +114,8 @@ function scrapeData(){
                 if (ar[i].length < 100 && ar[i].includes("available")) {
                     valid_times.push({
                         "building":ar[i-1],
-                        "washers":ar[i],
-                        "dryers":ar[i+1]
+                        "washers":ar[i].substring(0,ar[i].length-17),
+                        "dryers":ar[i+1].substring(0,ar[i+1].length-16)
                     })
                     i+=2
                 }
