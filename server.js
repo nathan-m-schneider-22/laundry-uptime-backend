@@ -71,7 +71,7 @@ var j = schedule.scheduleJob('*/5 * * * *', function(){
         })
     })
 
-    request('https://localhost:9090/', { json: true }, (err, res, body) => {
+    request('https://laundry-uptime.herokuapp.com/', { json: true }, (err, res, body) => {
       if (err) { return console.log(err); }
       console.log("Self-call")
       // console.log(body);
