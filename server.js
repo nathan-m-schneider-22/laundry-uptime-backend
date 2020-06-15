@@ -6,7 +6,6 @@ require("dotenv").config()
 const port = process.env.PORT || 9090
 var schedule = require('node-schedule');
 var request = require("request");
-const puppeteer = require('puppeteer');
 
 
 app.use(bodyParser.json())
@@ -16,14 +15,12 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-const URL = "mongodb://root:sv165030@ds155278.mlab.com:55278/heroku_t6wsbg17"
-const DB = "heroku_t6wsbg17"
+
+const URL = process.env.DB_URL
+const DB = process.env.DB_NAME
 
 
 var MongoClient = require('mongodb').MongoClient;
-
-// Connect to the db
-
 
 
 app.get('/data', (req,res) => {
@@ -33,48 +30,38 @@ app.get('/data', (req,res) => {
         var query = {};
         dbo.collection("scraped").find(query).toArray(function(err, result) {
           if (err) throw err;
-          console.log(result);
           res.send(result)
           db.close();
         });
-      
     })        
-
 })
 
 app.get('/', (req, res) => {
   console.log("pinged")
-    res.send({"message" :"This API is not for getting"})
+    res.send("Use /data for data")
 
 })
 
-app.post('/data', (req,res) => {
-
-    res.send({message:"Dont's send data"})
-
-});
 
 var j = schedule.scheduleJob('*/5 * * * *', function(){
-    const time = Date.now()
     scrapeData().then((data) => {
         MongoClient.connect(URL, function(err, db) {
           if (err) throw err;
           var dbo = db.db(DB);
-          for (i=0;i<data.length;i++){data[i].time = time}
 
           dbo.collection("scraped").insertOne(data, function(err, res) {
             if (err) throw err;
-            console.log("documents inserted");
+            console.log("document inserted");
             db.close();
           });
       
         })
     })
 
+    //Self request to prevent the heroku app from going to sleep
     request('https://laundry-uptime.herokuapp.com/', { json: true }, (err, res, body) => {
       if (err) { return console.log(err); }
       console.log("Self-call")
-      // console.log(body);
 
     });
 
@@ -82,47 +69,37 @@ var j = schedule.scheduleJob('*/5 * * * *', function(){
   });
 
   
-var htmlparser = require("htmlparser2");
 
 function scrapeData(){
     console.log("Scraping data")
-    const https = require('https');
-    var p1 = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
     const url = "https://proxybot.io/api/v1/JF33bQx0Xeb8ZHdr8fgovyZ82d13?render_js=true&url=https://www.peoplecount.live/embed/TqbMydvq_/oKbsHvaFb/__master__"
     request(url, function (error, response, body) {
         if (!error) {
-            data ={
-              time:Date.now()
-            }
+            //Find specific CSS tag position in HTML
             i = body.indexOf("count regular")
-            // console.log(body.slice(i+15,i+17))
+            //Retrive one or two digits from the correct position
             count = parseInt(body.slice(i+15,i+17).replace("<",""))
-            // console.log(count)
-            data.count = count
+
+            data ={
+              time:Date.now(),
+              count:count
+            }
             console.log(data)
             resolve(data)
         } else {
-        console.log(error);
+        reject(error);
         }
     })
 
   });
-  return p1
 
 }
 
-scrapeData()
-
-/**
- * Simple Error Handling
- */
 app.use(function(err, req, res, next){
     res.status(400).json(err)
   })
 
-/**
- * Port listening, on localhost
- */
 app.listen(port, () => console.log(`API Server listening on port ${port}!`))
 
 
