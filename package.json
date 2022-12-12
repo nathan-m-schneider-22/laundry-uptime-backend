@@ -19,7 +19,7 @@
   "homepage": "https://github.com/nathan-m-schneider-22/laundry-uptime-backend#readme",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "htmlparser2": "^4.0.0",
     "mongodb": "^3.5.3",
     "node-html-parser": "^1.2.6",
